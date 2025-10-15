@@ -5,8 +5,8 @@ from PIL import Image, ImageTk
 
 # Path to your images
 IMAGE_FOLDER = r"dataset\test\processed_failed"
-KEEP_FOLDER = r"dataset\test\processed_failed\final_success"
-DELETE_FOLDER = r"dataset\test\processed_failed\final_failed"
+KEEP_FOLDER = r"dataset\test\processed_success"
+DELETE_FOLDER = r"dataset\test\processed_failed"
 
 # Make sure folders exist
 os.makedirs(KEEP_FOLDER, exist_ok=True)
@@ -44,7 +44,7 @@ def keep():
 
 def delete():
     global index
-    shutil.move(os.path.join(IMAGE_FOLDER, image_files[index]), os.path.join(DELETE_FOLDER, image_files[index]))
+    #shutil.move(os.path.join(IMAGE_FOLDER, image_files[index]), os.path.join(DELETE_FOLDER, image_files[index]))
     index += 1
     show_image()
 
@@ -58,10 +58,10 @@ img_label.pack()
 filename_label = Label(root, text="", font=("Arial", 14))
 filename_label.pack()
 
-btn_keep = Button(root, text="Keep", command=keep, width=10, bg="green", fg="white")
+btn_keep = Button(root, text="Success", command=keep, width=10, bg="green", fg="white")
 btn_keep.pack(side="left", padx=10, pady=10)
 
-btn_delete = Button(root, text="Delete", command=delete, width=10, bg="red", fg="white")
+btn_delete = Button(root, text="Fail", command=delete, width=10, bg="red", fg="white")
 btn_delete.pack(side="right", padx=10, pady=10)
 
 show_image()
