@@ -42,16 +42,25 @@ def levenshtein_similarity(s1, s2):
     return similarity
 
 # Remove lines using simple thresholding
-def preprocess_image_with_Thresholding(image_path):
-    img = cv2.imread(image_path, 0)
+def remove_black_lines_and_inpaint(image_path, inpaint_radius=1):
+    """
+    img: input color image (BGR)
+    inpaint_radius: radius for inpainting
+
+    Returns: color image with black lines removed and intensity interpolated
+    """
+    img = cv2.imread(image_path)
     if img is None:
         return None
-    
-    # Apply simple thresholding to remove lines from grayscale images
-    _, lines = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY)
-    preprocessed_img = img - lines
+    # Step 1: Create mask for black lines
+    # A pixel is considered black if all channels are very low
+    black_mask = cv2.inRange(img, (0, 0, 0), (10, 10, 10))  # 0-10 intensity = black lines
 
-    return cv2.bitwise_not(preprocessed_img)
+    # Step 2: Inpaint the image
+    # cv2.inpaint expects a single-channel mask (255 = pixels to restore)
+    inpainted = cv2.inpaint(img, black_mask, inpaintRadius=inpaint_radius, flags=cv2.INPAINT_TELEA)
+
+    return cv2.cvtColor(inpainted, cv2.COLOR_BGR2GRAY)
 
 def preprocess_image(image_path):
     img = cv2.imread(image_path, 0)
@@ -124,7 +133,7 @@ def check_captcha_content(extracted_content, expected_content):
 def process_image_first_layer(filename, success_dir, failed_dir):
     filename = os.path.basename(filename)
     image_path = os.path.join(dataset_path, filename)
-    preprocessed_img = preprocess_image_with_Thresholding(image_path)
+    preprocessed_img = remove_black_lines_and_inpaint(image_path)
     
     if preprocessed_img is None:
         print(f"Failed to load image: {filename}")
@@ -241,6 +250,6 @@ if __name__ == "__main__":
 
     correct_predictions_third_layer = sum(results_third_layer)
     print(f"Correct Predictions in 3rd Layer: {correct_predictions_third_layer}")
-    # print(f"Total Correct Predictions (All Layers): {correct_predictions + correct_predictions_second_layer + correct_predictions_third_layer}")
+    #print(f"Total Correct Predictions (All Layers): {correct_predictions + correct_predictions_second_layer + correct_predictions_third_layer}")
 
 

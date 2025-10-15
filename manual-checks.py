@@ -59,7 +59,7 @@ def rename():
     # Ask user for new name
     new_name = askstring("Rename Image", f"Enter new name without extension:")
     if new_name:  # Only rename if user entered something
-        new_name += os.path.splitext(image_files[index])[1]  # keep original extension
+        new_name = f"{new_name}-0.png"
         new_path = os.path.join(KEEP_FOLDER, new_name)
         os.rename(old_path, new_path)
         image_files[index] = new_name  # update list for next display
