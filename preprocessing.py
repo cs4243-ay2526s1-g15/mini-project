@@ -28,40 +28,41 @@ def process_image(filename, success_dir, failed_dir):
     captcha_matches = check_captcha_content(extracted_text, expected_text)
 
     if captcha_matches:
-        cv2.imwrite(os.path.join(success_dir, filename), cv2.bitwise_not(preprocessed_img))
+        cv2.imwrite(os.path.join(success_dir, filename), preprocessed_img)
         print(f"Correct: {filename} -> {extracted_text}")
     else:
-        grayscale_resized_img = resize_captcha(cv2.imread(image_path, 0))
-        cv2.imwrite(os.path.join(failed_dir, filename), grayscale_resized_img)
+        grayscale_img = cv2.imread(image_path, 0)
+        _, lines = cv2.threshold(grayscale_img, 0, 255, cv2.THRESH_BINARY)
+        preprocessed_img = grayscale_img - lines
+        #grayscale_resized_img = resize_captcha(grayscale_img)
+        cv2.imwrite(os.path.join(failed_dir, filename), cv2.bitwise_not(preprocessed_img))
         print(f"Incorrect: {filename} -> {extracted_text} (Expected: {expected_text})")
 
     return captcha_matches
 
+# def resize_captcha(img, target_size=(380, 80)):
+#     h, w = img.shape[:2]
+#     target_w, target_h = target_size
 
+#     # Maintain aspect ratio first
+#     scale = target_h / h  # match height exactly
+#     new_w = int(w * scale)
+#     resized = cv2.resize(img, (new_w, target_h), interpolation=cv2.INTER_CUBIC)
 
-def resize_captcha(img, target_size=(380, 80)):
-    h, w = img.shape[:2]
-    target_w, target_h = target_size
+#     # If the width is still too large, center-crop it
+#     if new_w > target_w:
+#         start_x = (new_w - target_w) // 2
+#         resized = resized[:, start_x:start_x + target_w]
+#     else:
+#         # Otherwise, pad equally on left/right to reach target width
+#         pad_left = (target_w - new_w) // 2
+#         pad_right = target_w - new_w - pad_left
+#         resized = cv2.copyMakeBorder(
+#             resized, 0, 0, pad_left, pad_right,
+#             borderType=cv2.BORDER_CONSTANT, value=0
+#         )
 
-    # Maintain aspect ratio first
-    scale = target_h / h  # match height exactly
-    new_w = int(w * scale)
-    resized = cv2.resize(img, (new_w, target_h), interpolation=cv2.INTER_CUBIC)
-
-    # If the width is still too large, center-crop it
-    if new_w > target_w:
-        start_x = (new_w - target_w) // 2
-        resized = resized[:, start_x:start_x + target_w]
-    else:
-        # Otherwise, pad equally on left/right to reach target width
-        pad_left = (target_w - new_w) // 2
-        pad_right = target_w - new_w - pad_left
-        resized = cv2.copyMakeBorder(
-            resized, 0, 0, pad_left, pad_right,
-            borderType=cv2.BORDER_CONSTANT, value=0
-        )
-
-    return resized
+#     return resized
 
 def preprocess_image(image_path):
     img = cv2.imread(image_path, 0)
@@ -69,9 +70,9 @@ def preprocess_image(image_path):
         return None
     
     # Resize all images to a fixed size (width=380, height=80)
-    target_size = (380, 80)
-    # img = cv2.resize(img, target_size, interpolation=cv2.INTER_CUBIC)
-    img = resize_captcha(img, target_size)
+    # target_size = (380, 80)
+    # # img = cv2.resize(img, target_size, interpolation=cv2.INTER_CUBIC)
+    # img = resize_captcha(img, target_size)
 
     # Denoise slightly with a median filter (good for line noise and dots)
     img = cv2.medianBlur(img, 3)
@@ -96,7 +97,18 @@ def preprocess_image(image_path):
     # cv2.imshow("Preprocessed Image", thresh)
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
-    return preprocessed_img
+    return cv2.bitwise_not(preprocessed_img)
+
+def preprocess_image_with_Thresholding(image_path):
+    img = cv2.imread(image_path, 0)
+    if img is None:
+        return None
+    # Apply threshold to isolate text
+
+    _, lines = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY)
+    preprocessed_img = img - lines
+
+    return cv2.bitwise_not(preprocessed_img)
 
 def levenshtein_similarity(s1, s2):
     if len(s1) < len(s2):
@@ -136,7 +148,7 @@ def check_captcha_content(extracted_content, expected_content):
     # Check similarity using Levenshtein distance
     similarity = levenshtein_similarity(extracted_content, expected_content)
     # similarity = string_similarity(extracted_content, expected_content)
-    return similarity >= 0.3  # Threshold for considering a match
+    return similarity >= 0.5  # Threshold for considering a match
 
 if __name__ == "__main__":
     success_dir = os.path.join(dataset_path, "processed_success")
