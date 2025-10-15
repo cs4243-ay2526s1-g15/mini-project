@@ -2,6 +2,7 @@ import os
 import shutil
 from tkinter import Tk, Button, Label, PhotoImage
 from PIL import Image, ImageTk
+from tkinter.simpledialog import askstring
 
 # Path to your images
 IMAGE_FOLDER = r"dataset\test\processed_failed"
@@ -48,6 +49,23 @@ def delete():
     index += 1
     show_image()
 
+def rename():
+    global index
+    
+    if index >= len(image_files):
+        return
+    
+    old_path = os.path.join(IMAGE_FOLDER, image_files[index])
+    # Ask user for new name
+    new_name = askstring("Rename Image", f"Enter new name without extension:")
+    if new_name:  # Only rename if user entered something
+        new_name += os.path.splitext(image_files[index])[1]  # keep original extension
+        new_path = os.path.join(KEEP_FOLDER, new_name)
+        os.rename(old_path, new_path)
+        image_files[index] = new_name  # update list for next display
+    
+    index += 1
+    show_image()
 # GUI setup
 root = Tk()
 root.title("Image Reviewer")
@@ -63,6 +81,9 @@ btn_keep.pack(side="left", padx=10, pady=10)
 
 btn_delete = Button(root, text="Fail", command=delete, width=10, bg="red", fg="white")
 btn_delete.pack(side="right", padx=10, pady=10)
+
+btn_rename = Button(root, text = "Rename", command=rename, width=10, bg="blue", fg="white")
+btn_rename.pack(side="bottom", padx=10, pady=10)
 
 show_image()
 root.mainloop()
