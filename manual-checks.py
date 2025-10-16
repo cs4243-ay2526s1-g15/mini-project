@@ -5,9 +5,9 @@ from PIL import Image, ImageTk
 from tkinter.simpledialog import askstring
 
 # Path to your images
-IMAGE_FOLDER = r"dataset\test\processed_failed"
-KEEP_FOLDER = r"dataset\test\processed_success"
-DELETE_FOLDER = r"dataset\test\processed_failed"
+IMAGE_FOLDER = r"dataset\train\processed_failed"
+KEEP_FOLDER = r"dataset\train\processed_success"
+DELETE_FOLDER = r"dataset\train\processed_failed"
 
 # Make sure folders exist
 os.makedirs(KEEP_FOLDER, exist_ok=True)

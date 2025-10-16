@@ -14,7 +14,7 @@ pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tessera
 custom_config = r'--oem 3 --psm 7 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 
 # Path to the dataset
-dataset_path = r"dataset\test"
+dataset_path = r"dataset\train"
 
 # Levenshtein similarity function for comparing captcha text with filename
 def levenshtein_similarity(s1, s2):
@@ -41,7 +41,7 @@ def levenshtein_similarity(s1, s2):
     similarity = (max_len - distance) / max_len
     return similarity
 
-# Remove lines using simple thresholding
+# Remove lines 
 def remove_black_lines_and_inpaint(image_path, inpaint_radius=1):
     """
     img: input color image (BGR)
@@ -54,7 +54,7 @@ def remove_black_lines_and_inpaint(image_path, inpaint_radius=1):
         return None
     # Step 1: Create mask for black lines
     # A pixel is considered black if all channels are very low
-    black_mask = cv2.inRange(img, (0, 0, 0), (10, 10, 10))  # 0-10 intensity = black lines
+    black_mask = cv2.inRange(img, (0, 0, 0), (1, 1, 1))  # 0-10 intensity = black lines
 
     # Step 2: Inpaint the image
     # cv2.inpaint expects a single-channel mask (255 = pixels to restore)
@@ -250,6 +250,8 @@ if __name__ == "__main__":
 
     correct_predictions_third_layer = sum(results_third_layer)
     print(f"Correct Predictions in 3rd Layer: {correct_predictions_third_layer}")
-    #print(f"Total Correct Predictions (All Layers): {correct_predictions + correct_predictions_second_layer + correct_predictions_third_layer}")
+    print(f"Total Correct Predictions (All Layers): {correct_predictions + correct_predictions_second_layer + correct_predictions_third_layer}")
+    print(f"Correct Predictions in 2nd Layer: {correct_predictions_second_layer}")
+    print(f"Correct Predictions: {correct_predictions}")
 
 
