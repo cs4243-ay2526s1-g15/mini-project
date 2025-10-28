@@ -5,6 +5,7 @@ from PIL import Image, ImageTk
 from tkinter.simpledialog import askstring
 
 # Path to your images
+UNPROCESSED_FOLDER = r"dataset\main"
 IMAGE_FOLDER = r"dataset\train\processed_failed"
 KEEP_FOLDER = r"dataset\train\processed_success"
 DELETE_FOLDER = r"dataset\train\processed_failed"
@@ -19,7 +20,7 @@ index = 0
 
 # Function to show next image
 def show_image():
-    global index, img_label, filename_label, tk_image
+    global index, img_label, unprocessed_image_label, filename_label, tk_image, utk_image
 
     if index >= len(image_files):
         print("No more images!")
@@ -27,13 +28,20 @@ def show_image():
         return
 
     file_path = os.path.join(IMAGE_FOLDER, image_files[index])
+    unprocessed_file_path = os.path.join(UNPROCESSED_FOLDER, image_files[index])
     pil_image = Image.open(file_path)
+    unprocessed_image = Image.open(unprocessed_file_path)
 
     # Resize if too big
     pil_image.thumbnail((800, 800))
     tk_image = ImageTk.PhotoImage(pil_image)
 
+    unprocessed_image.thumbnail((800,800))
+    utk_image = ImageTk.PhotoImage(unprocessed_image)
+
     img_label.config(image=tk_image)
+    unprocessed_image_label.config(image=utk_image)
+
     filename_label.config(text=image_files[index])
 
 # Button callbacks
@@ -72,6 +80,9 @@ root.title("Image Reviewer")
 
 img_label = Label(root)
 img_label.pack()
+
+unprocessed_image_label = Label(root)
+unprocessed_image_label.pack()
 
 filename_label = Label(root, text="", font=("Arial", 14))
 filename_label.pack()
